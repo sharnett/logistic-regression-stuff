@@ -1,0 +1,72 @@
+\documentclass[11pt]{article}
+\usepackage[margin=0.75in]{geometry}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+
+\title{Regularized logistic regression gradient with weighted samples}
+
+\begin{document}
+
+\maketitle
+
+Scikit-learn's batch logistic regression (which uses LIBLINEAR) doesn't support weighted
+samples. The SGD classifier does support weighted samples, but it can be tricky to tune.
+For my application, solving the optimization problem in batch with L-BFGS worked best.
+
+\section*{No regularization, no weights}
+
+In other words, all samples have weight $1.0$. $M$ training examples and $N$ features,
+one of which is a dummy feature for the intercept. \\
+
+$\theta \in \mathbb{R}^N$ - coefficients
+
+$y \in \{0, 1\}^M$ - response variable ($M x 1$ vector)
+
+$X \in \{0, 1\}^{MxN}$ - $M x N$ design matrix
+
+$f(x) = \frac{1}{1+e^{-x}}$ - logistic function
+
+$l(\theta)$ - loss function
+
+$l(\theta) = - e^T \left(y \odot \log(p) + (1-y) \odot \log(1-p)\right) $
+
+where $p = f(X^T \theta)$
+
+aka average log-loss
+
+$$r = f(X^T \theta) - y$$
+
+$$\nabla l = X^T r $$
+
+\section*{Standard regularization}
+
+No regularization on the intercept. $M$ training examples and $N$ features. \\
+
+$\theta \in \mathbb{R}^N$ - coefficients
+
+$\theta_0 \in \mathbb{R}$ - intercept
+
+$y \in \{0, 1\}^M$ - response variable ($M x 1$ vector)
+
+$w \in (0, \infty)^N $ - per example weight ($N x 1$ vector)
+
+$X \in \{0, 1\}^{MxN}$ - $M x N$ design matrix
+
+$f(x) = \frac{1}{1+e^{-x}}$ - logistic function
+
+$l(\theta)$ - loss function
+
+$l(\theta) = -w^T \left(y \odot \log(p) + (1-y) \odot \log(1-p)\right) / \sum w $
+
+where $p = f(X^T \theta + \theta_0)$
+
+aka average of the usual log-loss, weighted by $w$
+
+$$r = f(X^T \theta + \theta_0) - y$$
+
+$$\nabla_0 l = \frac{r^T w}{\sum w} $$
+
+$$\nabla l = \frac{X^T (w \odot r) + \lambda \theta}{ \sum w} $$
+
+
+\end{document}
